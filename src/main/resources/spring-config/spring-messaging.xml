@@ -1,0 +1,27 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="embeddedJms" class="org.hornetq.integration.spring.SpringJmsBootstrap"
+		init-method="start" destroy-method="stop" />
+
+	<bean id="connectVOutboundQueueReciever"
+		class="com.bioimagene.iii.ims.messaging.recieve.impl.ImsToConnectVReciever" />
+
+	<bean id="imsMessagePublisher" class="com.bioimagene.iii.ims.messaging.publish.impl.ImsMessagePublisherImpl">
+		<property name="connectionFactory" ref="ConnectionFactory" />
+		<property name="connectVoutboundDestination" ref="/queue/connectVOutboundQueue" />
+	</bean>
+
+	<bean id="recieverContainer"
+		class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="destination" ref="/queue/connectVOutboundQueue" />
+		<property name="messageListener" ref="connectVOutboundQueueReciever" />
+	</bean>
+	
+	<bean id="cacheConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+		<constructor-arg name="targetConnectionFactory" ref="connectionFactory"></constructor-arg>
+	</bean>
+</beans>
